@@ -1,0 +1,611 @@
+#compdef zellij
+#description:zellij terminal workspace
+#
+# ZSH Completion for zellij (https://zellij.dev)
+#
+# Authors: AlfredMoore
+# Licence: BSD-3-Clause (https://opensource.org/license/BSD-3-clause)
+# Version: 0.1
+# Homepage: https://github.com/AlfredMoore/zellij-zsh-completion
+#
+# To use this completion, install it somewhere on your hard drive:
+#
+#     $ git clone https://github.com/AlfredMoore/zellij-zsh-completion
+#
+# And then add it to your $fpath in ~/.zshrc before you call compinit:
+#
+#     fpath+=/path/to/where/you/installed/zellij-zsh-completion
+#     compinit
+#
+# When developing, you can use the following to reload the completion after
+# having modified it:
+#
+#    $ unfunction _zellij && autoload -U _zellij
+#
+
+local state line context
+local -A opt_args
+
+# ── Helper Functions ─────────────────────────────────────────────────────────
+
+__zellij_sessions(){
+    local -a sessions
+    sessions=(${(f)"$(zellij list-sessions --short 2>/dev/null)"})
+    _describe -t sessions 'zellij sessions' sessions
+}
+
+__zellij_commands(){
+    local -a session_cmds pane_cmds config_cmds misc_cmds
+    session_cmds=(
+        'list-sessions:List active sessions'
+        'ls:List active sessions'
+        'attach:Attach to a session'
+        'a:Attach to a session'
+        'kill-session:Kill a specific session'
+        'k:Kill a specific session'
+        'delete-session:Delete a specific session'
+        'd:Delete a specific session'
+        'kill-all-sessions:Kill all sessions'
+        'ka:Kill all sessions'
+        'delete-all-sessions:Delete all sessions'
+        'da:Delete all sessions'
+    )
+    pane_cmds=(
+        'action:Send actions to a specific session'
+        'ac:Send actions to a specific session'
+        'run:Run a command in a new pane'
+        'r:Run a command in a new pane'
+        'plugin:Load a plugin'
+        'p:Load a plugin'
+        'edit:Edit file with default $EDITOR / $VISUAL'
+        'e:Edit file with default $EDITOR / $VISUAL'
+        'pipe:Send data to one or more plugins, launch them if they are not running'
+    )
+    config_cmds=(
+        'options:Change the behaviour of zellij'
+        'setup:Setup zellij and check its configuration'
+        'convert-config:Convert old configuration file'
+        'convert-layout:Convert old layout file'
+        'convert-theme:Convert old theme file'
+    )
+    misc_cmds=(
+        'web:Run a web server to serve terminal sessions'
+        'list-aliases:List existing plugin aliases'
+        'la:List existing plugin aliases'
+        'help:Print this message or the help of the given subcommand(s)'
+    )
+    _describe -t session_cmds 'session commands' session_cmds
+    _describe -t pane_cmds 'pane commands' pane_cmds
+    _describe -t config_cmds 'config commands' config_cmds
+    _describe -t misc_cmds 'misc commands' misc_cmds
+}
+
+__zellij_action_commands(){
+    local -a pane_cmds tab_cmds scroll_cmds layout_cmds plugin_cmds misc_cmds
+    pane_cmds=(
+        'write:Write bytes to the terminal'
+        'write-chars:Write characters to the terminal'
+        'new-pane:Open a new pane in the specified direction'
+        'close-pane:Close the focused pane'
+        'focus-next-pane:Change focus to the next pane'
+        'focus-previous-pane:Change focus to the previous pane'
+        'move-focus:Move the focused pane in the specified direction'
+        'move-focus-or-tab:Move focus to the pane or tab in the specified direction'
+        'move-pane:Change the location of the focused pane'
+        'move-pane-backwards:Rotate the location of the previous pane backwards'
+        'resize:[increase|decrease] the focused panes area at the border'
+        'toggle-fullscreen:Toggle between fullscreen focus pane and normal layout'
+        'toggle-pane-frames:Toggle frames around panes in the UI'
+        'toggle-pane-embed-or-floating:Embed focused pane if floating or float if embedded'
+        'toggle-floating-panes:Toggle the visibility of all floating panes'
+        'toggle-pane-pinned:Toggle pinned state of floating pane'
+        'toggle-active-sync-tab:Toggle between sending text to all panes and normal mode'
+        'rename-pane:Renames the focused pane'
+        'undo-rename-pane:Remove a previously set pane name'
+        'stack-panes:Stack pane ids'
+        'change-floating-pane-coordinates:Change floating pane coordinates'
+        'edit:Open the specified file in a new zellij pane with your default EDITOR'
+    )
+    tab_cmds=(
+        'new-tab:Create a new tab, optionally with a specified layout and name'
+        'close-tab:Close the current tab'
+        'go-to-tab:Go to tab with index'
+        'go-to-tab-name:Go to tab with name'
+        'go-to-next-tab:Go to the next tab'
+        'go-to-previous-tab:Go to the previous tab'
+        'rename-tab:Renames the focused tab'
+        'undo-rename-tab:Remove a previously set tab name'
+        'move-tab:Move the focused tab in the specified direction'
+    )
+    scroll_cmds=(
+        'scroll-up:Scroll up in the focused pane'
+        'scroll-down:Scroll down in focus pane'
+        'scroll-to-top:Scroll up to top in focus pane'
+        'scroll-to-bottom:Scroll down to bottom in focus pane'
+        'page-scroll-up:Scroll up one page in focus pane'
+        'page-scroll-down:Scroll down one page in focus pane'
+        'half-page-scroll-up:Scroll up half page in focus pane'
+        'half-page-scroll-down:Scroll down half page in focus pane'
+        'edit-scrollback:Open the pane scrollback in your default editor'
+    )
+    layout_cmds=(
+        'dump-screen:Dump the focused pane to a file'
+        'dump-layout:Dump current layout to stdout'
+        'previous-swap-layout:Switch to previous swap layout'
+        'next-swap-layout:Switch to next swap layout'
+    )
+    plugin_cmds=(
+        'start-or-reload-plugin:Start or reload a plugin'
+        'launch-or-focus-plugin:Launch or focus a plugin'
+        'launch-plugin:Launch a plugin'
+    )
+    misc_cmds=(
+        'clear:Clear all buffers for a focused pane'
+        'switch-mode:Switch input mode of all connected clients'
+        'rename-session:Rename the current session'
+        'pipe:Send data to one or more plugins'
+        'list-clients:List connected clients'
+        'query-tab-names:Query all tab names'
+        'help:Print this message or the help of the given subcommand(s)'
+    )
+    _describe -t pane_cmds 'pane commands' pane_cmds
+    _describe -t tab_cmds 'tab commands' tab_cmds
+    _describe -t scroll_cmds 'scroll commands' scroll_cmds
+    _describe -t layout_cmds 'layout commands' layout_cmds
+    _describe -t plugin_cmds 'plugin commands' plugin_cmds
+    _describe -t misc_cmds 'misc commands' misc_cmds
+}
+
+__zellij_attach_commands(){
+    local -a commands
+    commands=(
+        'options:Change the behaviour of zellij'
+        'help:Print this message or the help of the given subcommand(s)'
+    )
+    _describe -t commands 'zellij attach commands' commands
+}
+
+# ── Shared Option Arrays ─────────────────────────────────────────────────────
+
+local -a help_opts config_opts floating_pane_opts
+
+help_opts=(
+    '(-h --help)'{-h,--help}'[Print help information]'
+)
+
+config_opts=(
+    '--simplified-ui=[Allow plugins to use a more simplified layout (true or false)]:SIMPLIFIED_UI:(true false)'
+    '--theme=[Set the default theme]:THEME: '
+    '--default-mode=[Set the default mode]:DEFAULT_MODE:((normal\:"In Normal mode, input is always written to the terminal, except for the shortcuts leading to other modes"
+locked\:"In Locked mode, input is always written to the terminal and all shortcuts are disabled except the one leading back to normal mode"
+resize\:"Resize mode allows resizing the different existing panes"
+pane\:"Pane mode allows creating and closing panes, as well as moving between them"
+tab\:"Tab mode allows creating and closing tabs, as well as moving between them"
+scroll\:"Scroll mode allows scrolling up and down within a pane"
+enter-search\:"EnterSearch mode allows for typing in the needle for a search in the scroll buffer of a pane"
+search\:"Search mode allows for searching a term in a pane (superset of Scroll)"
+rename-tab\:"RenameTab mode allows assigning a new name to a tab"
+rename-pane\:"RenamePane mode allows assigning a new name to a pane"
+session\:"Session mode allows detaching sessions"
+move\:"Move mode allows moving the different existing panes within a tab"
+prompt\:"Prompt mode allows interacting with active prompts"
+tmux\:"Tmux mode allows for basic tmux keybindings functionality"))'
+    '--default-shell=[Set the default shell]:DEFAULT_SHELL:_files'
+    '--default-cwd=[Set the default cwd]:DEFAULT_CWD:_files'
+    '--default-layout=[Set the default layout]:DEFAULT_LAYOUT:_files'
+    '--layout-dir=[Set the layout_dir, defaults to subdirectory of config dir]:LAYOUT_DIR:_files'
+    '--theme-dir=[Set the theme_dir, defaults to subdirectory of config dir]:THEME_DIR:_files'
+    '--mouse-mode=[Set the handling of mouse events (true or false)]:MOUSE_MODE:(true false)'
+    '--pane-frames=[Set display of the pane frames (true or false)]:PANE_FRAMES:(true false)'
+    '--mirror-session=[Mirror session when multiple users are connected (true or false)]:MIRROR_SESSION:(true false)'
+    '--on-force-close=[Set behaviour on force close (quit or detach)]:ON_FORCE_CLOSE:(quit detach)'
+    '--scroll-buffer-size=[]:SCROLL_BUFFER_SIZE: '
+    '--copy-command=[Switch to using a user supplied command for clipboard instead of OSC52]:COPY_COMMAND: '
+    '(--copy-command)--copy-clipboard=[OSC52 destination clipboard]:COPY_CLIPBOARD:(system primary)'
+    '--copy-on-select=[Automatically copy when selecting text (true or false)]:COPY_ON_SELECT:(true false)'
+    '--scrollback-editor=[Explicit full path to open the scrollback editor (default is $EDITOR or $VISUAL)]:SCROLLBACK_EDITOR:_files'
+    '--session-name=[The name of the session to create when starting Zellij]:SESSION_NAME: '
+    '--attach-to-session=[Whether to attach to a session specified in "session-name" if it exists]:ATTACH_TO_SESSION:(true false)'
+    '--auto-layout=[Whether to lay out panes in a predefined set of layouts whenever possible]:AUTO_LAYOUT:(true false)'
+    '--session-serialization=[Whether sessions should be serialized to the HD so that they can be later resurrected, default is true]:SESSION_SERIALIZATION:(true false)'
+    '--serialize-pane-viewport=[Whether pane viewports are serialized along with the session, default is false]:SERIALIZE_PANE_VIEWPORT:(true false)'
+    '--scrollback-lines-to-serialize=[Scrollback lines to serialize along with the pane viewport when serializing sessions]:SCROLLBACK_LINES_TO_SERIALIZE: '
+    '--styled-underlines=[Whether to use ANSI styled underlines]:STYLED_UNDERLINES:(true false)'
+    '--serialization-interval=[The interval at which to serialize sessions for resurrection (in seconds)]:SERIALIZATION_INTERVAL: '
+    '--disable-session-metadata=[If true, will disable writing session metadata to disk]:DISABLE_SESSION_METADATA:(true false)'
+    '--support-kitty-keyboard-protocol=[Whether to enable support for the Kitty keyboard protocol]:SUPPORT_KITTY_KEYBOARD_PROTOCOL:(true false)'
+    '--web-server=[Whether to make sure a local web server is running when a new Zellij session starts]:WEB_SERVER:(true false)'
+    '--web-sharing=[Whether to allow new sessions to be shared through a local web server]:WEB_SHARING:(on off disabled)'
+    '--stacked-resize=[Whether to stack panes when resizing beyond a certain size, default is true]:STACKED_RESIZE:(true false)'
+    '--show-startup-tips=[Whether to show startup tips when starting a new session, default is true]:SHOW_STARTUP_TIPS:(true false)'
+    '--show-release-notes=[Whether to show release notes on first run of a new version, default is true]:SHOW_RELEASE_NOTES:(true false)'
+    '--advanced-mouse-actions=[Whether to enable mouse hover effects and pane grouping functionality, default is true]:ADVANCED_MOUSE_ACTIONS:(true false)'
+    '--post-command-discovery-hook=[A command to run after the discovery of running commands when serializing]:POST_COMMAND_DISCOVERY_HOOK: '
+    '(--mouse-mode)--disable-mouse-mode[Disable handling of mouse events]'
+    '(--pane-frames)--no-pane-frames[Disable display of pane frames]'
+)
+
+floating_pane_opts=(
+    '-x+[The x coordinates if the pane is floating (bare integer or percent)]:X: '
+    '--x=[The x coordinates if the pane is floating (bare integer or percent)]:X: '
+    '-y+[The y coordinates if the pane is floating (bare integer or percent)]:Y: '
+    '--y=[The y coordinates if the pane is floating (bare integer or percent)]:Y: '
+    '--width=[The width if the pane is floating (bare integer or percent)]:WIDTH: '
+    '--height=[The height if the pane is floating (bare integer or percent)]:HEIGHT: '
+    '--pinned=[Whether to pin a floating pane so that it is always on top]:PINNED: '
+    '*-f[Open the new pane in floating mode]'
+    '*--floating[Open the new pane in floating mode]'
+    '(-f --floating -d --direction)*-i[Open the new pane in place of the current pane, temporarily suspending it]'
+    '(-f --floating -d --direction)*--in-place[Open the new pane in place of the current pane, temporarily suspending it]'
+)
+
+# ── Main Dispatch ─────────────────────────────────────────────────────────────
+
+local -a global_opts
+global_opts=(
+    '--max-panes=[Maximum panes on screen, caution: opening more panes will close old ones]:MAX_PANES: '
+    '--data-dir=[Change where zellij looks for plugins]:DATA_DIR:_files'
+    '--server=[Run server listening at the specified socket path]:SERVER:_files'
+    '(-s --session)'{-s,--session}'=[Specify name of a new session]:SESSION: '
+    '(-l --layout)'{-l,--layout}'=[Name of a predefined layout or path to a layout file]:LAYOUT:_files'
+    '(-n --new-session-with-layout)'{-n,--new-session-with-layout}'=[Layout for a new session]:NEW_SESSION_WITH_LAYOUT:_files'
+    '(-c --config)'{-c,--config}'=[Change where zellij looks for the configuration file]:CONFIG:_files'
+    '--config-dir=[Change where zellij looks for the configuration directory]:CONFIG_DIR:_files'
+    '(-h --help)'{-h,--help}'[Print help information]'
+    '(-V --version)'{-V,--version}'[Print version information]'
+    '(-d --debug)'{-d,--debug}'[Specify emitting additional debug information]'
+)
+
+_arguments -s -S -C $global_opts \
+    ': :->command' \
+    '*:: :->subcmd'
+
+case $state in
+(command)
+    __zellij_commands
+    ;;
+(subcmd)
+    case ${line[1]} in
+    (options)
+        _arguments -s -S -C $help_opts \
+            $config_opts \
+            '::web-server-ip:' \
+            '::web-server-port:' \
+            '::web-server-cert:' \
+            '::web-server-key:' \
+            '::enforce-https-for-localhost:'
+        ;;
+    (setup)
+        _arguments -s -S -C $help_opts \
+            '--dump-layout=[Dump specified layout to stdout]:DUMP_LAYOUT: ' \
+            '--dump-swap-layout=[Dump the specified swap layout file to stdout]:DUMP_SWAP_LAYOUT: ' \
+            '--dump-plugins=[Dump the builtin plugins to DIR or "DATA DIR" if unspecified]:DIR:_files' \
+            '--generate-completion=[Generates completion for the specified shell]:SHELL: ' \
+            '--generate-auto-start=[Generates auto-start script for the specified shell]:SHELL: ' \
+            '--dump-config[Dump the default configuration file to stdout]' \
+            '--clean[Disables loading of configuration file at default location, loads the defaults that zellij ships with]' \
+            '--check[Checks the configuration of zellij and displays currently used directories]'
+        ;;
+    (web)
+        _arguments -s -S -C $help_opts \
+            '--revoke-token=[Revoke a login token by its name]:TOKEN_NAME: ' \
+            '(--stop --status --create-token --revoke-token --revoke-all-tokens)--ip=[The ip address to listen on locally]:IP: ' \
+            '(--stop --status --create-token --revoke-token --revoke-all-tokens)--port=[The port to listen on locally]:PORT: ' \
+            '(--stop --status --create-token --revoke-token --revoke-all-tokens)--cert=[The path to the SSL certificate]:CERT:_files' \
+            '(--stop --status --create-token --revoke-token --revoke-all-tokens)--key=[The path to the SSL key]:KEY:_files' \
+            '--start[Start the server (default unless other arguments are specified)]' \
+            '--stop[Stop the server]' \
+            '--status[Get the server status]' \
+            '(--stop --status --create-token --revoke-token --revoke-all-tokens)-d[Run the server in the background]' \
+            '(--stop --status --create-token --revoke-token --revoke-all-tokens)--daemonize[Run the server in the background]' \
+            '--create-token[Create a login token for the web interface]' \
+            '--revoke-all-tokens[Revoke all login tokens]' \
+            '--list-tokens[List token names and their creation dates]'
+        ;;
+    (list-sessions|ls)
+        _arguments -s -S -C $help_opts \
+            '(-n --no-formatting)'{-n,--no-formatting}'[Do not add colors and formatting to the list]' \
+            '(-s --short)'{-s,--short}'[Print just the session name]' \
+            '(-r --reverse)'{-r,--reverse}'[List the sessions in reverse order]'
+        ;;
+    (list-aliases|la)
+        _arguments -s -S -C $help_opts
+        ;;
+    (attach|a)
+        _arguments -s -S -C $help_opts \
+            '--index=[Number of the session index in the active sessions ordered creation date]:INDEX: ' \
+            '(-c --create)'{-c,--create}'[Create a session if one does not exist]' \
+            '(-b --create-background)'{-b,--create-background}'[Create a detached session in the background if one does not exist]' \
+            '(-f --force-run-commands)'{-f,--force-run-commands}'[If resurrecting a dead session, immediately run all its commands on startup]' \
+            '::session-name:__zellij_sessions' \
+            ': :->attach_command' \
+            '*:: :->attach_subcmd'
+
+        case $state in
+        (attach_command)
+            __zellij_attach_commands
+            ;;
+        (attach_subcmd)
+            case ${line[2]} in
+            (options)
+                _arguments -s -S -C $help_opts \
+                    $config_opts \
+                    '::web-server-ip:' \
+                    '::web-server-port:' \
+                    '::web-server-cert:' \
+                    '::web-server-key:' \
+                    '::enforce-https-for-localhost:'
+                ;;
+            (help)
+                _arguments -s -S -C \
+                    '*::subcommand:'
+                ;;
+            esac
+            ;;
+        esac
+        ;;
+    (kill-session|k)
+        _arguments -s -S -C $help_opts \
+            '::target-session:__zellij_sessions'
+        ;;
+    (delete-session|d)
+        _arguments -s -S -C $help_opts \
+            '(-f --force)'{-f,--force}'[Kill the session if it'\''s running before deleting it]' \
+            '::target-session:__zellij_sessions'
+        ;;
+    (kill-all-sessions|ka)
+        _arguments -s -S -C $help_opts \
+            '(-y --yes)'{-y,--yes}'[Automatic yes to prompts]'
+        ;;
+    (delete-all-sessions|da)
+        _arguments -s -S -C $help_opts \
+            '(-y --yes)'{-y,--yes}'[Automatic yes to prompts]' \
+            '(-f --force)'{-f,--force}'[Kill the sessions if they'\''re running before deleting them]'
+        ;;
+    (action|ac)
+        _arguments -s -S -C $help_opts \
+            ': :->action_command' \
+            '*:: :->action_subcmd'
+
+        case $state in
+        (action_command)
+            __zellij_action_commands
+            ;;
+        (action_subcmd)
+            case ${line[1]} in
+            # ── Simple commands: only -h/--help, no positional args ──
+            (focus-next-pane|focus-previous-pane|move-pane-backwards|clear|\
+            dump-layout|edit-scrollback|\
+            scroll-up|scroll-down|scroll-to-bottom|scroll-to-top|\
+            page-scroll-up|page-scroll-down|half-page-scroll-up|half-page-scroll-down|\
+            toggle-fullscreen|toggle-pane-frames|toggle-active-sync-tab|\
+            toggle-pane-embed-or-floating|toggle-floating-panes|\
+            close-pane|undo-rename-pane|\
+            go-to-next-tab|go-to-previous-tab|close-tab|undo-rename-tab|\
+            previous-swap-layout|next-swap-layout|query-tab-names|\
+            list-clients|toggle-pane-pinned)
+                _arguments -s -S -C $help_opts
+                ;;
+            (write)
+                _arguments -s -S -C $help_opts \
+                    '*::bytes:'
+                ;;
+            (write-chars)
+                _arguments -s -S -C $help_opts \
+                    ':chars:'
+                ;;
+            (resize)
+                _arguments -s -S -C $help_opts \
+                    ':resize:' \
+                    '::direction:'
+                ;;
+            (move-focus)
+                _arguments -s -S -C $help_opts \
+                    ':direction:'
+                ;;
+            (move-focus-or-tab)
+                _arguments -s -S -C $help_opts \
+                    ':direction:'
+                ;;
+            (move-pane)
+                _arguments -s -S -C $help_opts \
+                    '::direction:'
+                ;;
+            (dump-screen)
+                _arguments -s -S -C $help_opts \
+                    '(-f --full)'{-f,--full}'[Dump the pane with full scrollback]' \
+                    ':path:'
+                ;;
+            (switch-mode)
+                _arguments -s -S -C $help_opts \
+                    ':input-mode:'
+                ;;
+            (rename-pane)
+                _arguments -s -S -C $help_opts \
+                    ':name:'
+                ;;
+            (go-to-tab)
+                _arguments -s -S -C $help_opts \
+                    ':index:'
+                ;;
+            (go-to-tab-name)
+                _arguments -s -S -C $help_opts \
+                    '(-c --create)'{-c,--create}'[Create a tab if one does not exist]' \
+                    ':name:'
+                ;;
+            (rename-tab)
+                _arguments -s -S -C $help_opts \
+                    ':name:'
+                ;;
+            (move-tab)
+                _arguments -s -S -C $help_opts \
+                    ':direction:'
+                ;;
+            (rename-session)
+                _arguments -s -S -C $help_opts \
+                    ':name:'
+                ;;
+            (stack-panes)
+                _arguments -s -S -C $help_opts \
+                    '*::pane-ids:'
+                ;;
+            (new-pane)
+                _arguments -s -S -C $help_opts \
+                    '(-f --floating)*-d+[Direction to open the new pane in]:DIRECTION: ' \
+                    '(-f --floating)*--direction=[Direction to open the new pane in]:DIRECTION: ' \
+                    '(-d --direction)-p+[]:PLUGIN: ' \
+                    '(-d --direction)--plugin=[]:PLUGIN: ' \
+                    '--cwd=[Change the working directory of the new pane]:CWD:_files' \
+                    '(-n --name)'{-n,--name}'=[Name of the new pane]:NAME: ' \
+                    '--configuration=[]:CONFIGURATION: ' \
+                    $floating_pane_opts \
+                    '(-c --close-on-exit)'{-c,--close-on-exit}'[Close the pane immediately when its command exits]' \
+                    '(-s --start-suspended)'{-s,--start-suspended}'[Start the command suspended, only running after you first press ENTER]' \
+                    '--skip-plugin-cache[]' \
+                    '(-f --floating -d --direction)--stacked[]' \
+                    '*::command:'
+                ;;
+            (edit)
+                _arguments -s -S -C $help_opts \
+                    '(-f --floating)*-d+[Direction to open the new pane in]:DIRECTION: ' \
+                    '(-f --floating)*--direction=[Direction to open the new pane in]:DIRECTION: ' \
+                    '(-l --line-number)'{-l,--line-number}'=[Open the file in the specified line number]:LINE_NUMBER: ' \
+                    '--cwd=[Change the working directory of the editor]:CWD:_files' \
+                    $floating_pane_opts \
+                    ':file:'
+                ;;
+            (new-tab)
+                _arguments -s -S -C $help_opts \
+                    '(-l --layout)'{-l,--layout}'=[Layout to use for the new tab]:LAYOUT:_files' \
+                    '--layout-dir=[Default folder to look for layouts]:LAYOUT_DIR:_files' \
+                    '(-n --name)'{-n,--name}'=[Name of the new tab]:NAME: ' \
+                    '(-c --cwd)'{-c,--cwd}'=[Change the working directory of the new tab]:CWD:_files'
+                ;;
+            (start-or-reload-plugin)
+                _arguments -s -S -C $help_opts \
+                    '(-c --configuration)'{-c,--configuration}'=[]:CONFIGURATION: ' \
+                    ':url:'
+                ;;
+            (launch-or-focus-plugin)
+                _arguments -s -S -C $help_opts \
+                    '(-c --configuration)'{-c,--configuration}'=[]:CONFIGURATION: ' \
+                    '(-f --floating)'{-f,--floating}'[]' \
+                    '(-i --in-place)'{-i,--in-place}'[]' \
+                    '(-m --move-to-focused-tab)'{-m,--move-to-focused-tab}'[]' \
+                    '(-s --skip-plugin-cache)'{-s,--skip-plugin-cache}'[]' \
+                    ':url:'
+                ;;
+            (launch-plugin)
+                _arguments -s -S -C $help_opts \
+                    '(-c --configuration)'{-c,--configuration}'=[]:CONFIGURATION: ' \
+                    '(-f --floating)'{-f,--floating}'[]' \
+                    '(-i --in-place)'{-i,--in-place}'[]' \
+                    '(-s --skip-plugin-cache)'{-s,--skip-plugin-cache}'[]' \
+                    ':url:'
+                ;;
+            (change-floating-pane-coordinates)
+                _arguments -s -S -C $help_opts \
+                    '(-p --pane-id)'{-p,--pane-id}'=[The pane_id of the floating pane]:PANE_ID: ' \
+                    '-x+[The x coordinates (bare integer or percent)]:X: ' \
+                    '--x=[The x coordinates (bare integer or percent)]:X: ' \
+                    '-y+[The y coordinates (bare integer or percent)]:Y: ' \
+                    '--y=[The y coordinates (bare integer or percent)]:Y: ' \
+                    '--width=[The width (bare integer or percent)]:WIDTH: ' \
+                    '--height=[The height (bare integer or percent)]:HEIGHT: ' \
+                    '--pinned=[Whether to pin a floating pane]:PINNED: '
+                ;;
+            (pipe)
+                _arguments -s -S -C $help_opts \
+                    '(-n --name)'{-n,--name}'=[The name of the pipe]:NAME: ' \
+                    '(-a --args)'{-a,--args}'=[The args of the pipe]:ARGS: ' \
+                    '(-p --plugin)'{-p,--plugin}'=[The plugin url to direct this pipe to]:PLUGIN: ' \
+                    '(-c --plugin-configuration)'{-c,--plugin-configuration}'=[The plugin configuration]:PLUGIN_CONFIGURATION: ' \
+                    '(-f --floating-plugin)'{-f,--floating-plugin}'=[If launching a plugin, should it be floating]:FLOATING_PLUGIN:(true false)' \
+                    '(-f --floating-plugin -i --in-place-plugin)'{-i,--in-place-plugin}'=[If launching a plugin, launch it in-place]:IN_PLACE_PLUGIN:(true false)' \
+                    '(-w --plugin-cwd)'{-w,--plugin-cwd}'=[If launching a plugin, specify its working directory]:PLUGIN_CWD:_files' \
+                    '(-t --plugin-title)'{-t,--plugin-title}'=[If launching a plugin, specify its pane title]:PLUGIN_TITLE: ' \
+                    '(-l --force-launch-plugin)'{-l,--force-launch-plugin}'[Launch a new plugin even if one is already running]' \
+                    '(-s --skip-plugin-cache)'{-s,--skip-plugin-cache}'[If launching a new plugin, skip cache and force-compile]' \
+                    '::payload:'
+                ;;
+            (help)
+                _arguments -s -S -C \
+                    '*::subcommand:'
+                ;;
+            esac
+            ;;
+        esac
+        ;;
+    (run|r)
+        _arguments -s -S -C $help_opts \
+            '(-f --floating)*-d+[Direction to open the new pane in]:DIRECTION: ' \
+            '(-f --floating)*--direction=[Direction to open the new pane in]:DIRECTION: ' \
+            '--cwd=[Change the working directory of the new pane]:CWD:_files' \
+            '(-n --name)'{-n,--name}'=[Name of the new pane]:NAME: ' \
+            $floating_pane_opts \
+            '(-c --close-on-exit)'{-c,--close-on-exit}'[Close the pane immediately when its command exits]' \
+            '(-s --start-suspended)'{-s,--start-suspended}'[Start the command suspended, only running after you first press ENTER]' \
+            '(-f --floating -d --direction)--stacked[]' \
+            '*::command:'
+        ;;
+    (plugin|p)
+        _arguments -s -S -C $help_opts \
+            '(-c --configuration)'{-c,--configuration}'=[Plugin configuration]:CONFIGURATION: ' \
+            $floating_pane_opts \
+            '(-s --skip-plugin-cache)'{-s,--skip-plugin-cache}'[Skip the memory and HD cache and force recompile of the plugin]' \
+            ':url:'
+        ;;
+    (edit|e)
+        _arguments -s -S -C $help_opts \
+            '(-l --line-number)'{-l,--line-number}'=[Open the file in the specified line number]:LINE_NUMBER: ' \
+            '(-f --floating)*-d+[Direction to open the new pane in]:DIRECTION: ' \
+            '(-f --floating)*--direction=[Direction to open the new pane in]:DIRECTION: ' \
+            '--cwd=[Change the working directory of the editor]:CWD:_files' \
+            $floating_pane_opts \
+            ':file:_files'
+        ;;
+    (convert-config)
+        _arguments -s -S -C $help_opts \
+            ':old-config-file:_files'
+        ;;
+    (convert-layout)
+        _arguments -s -S -C $help_opts \
+            ':old-layout-file:_files'
+        ;;
+    (convert-theme)
+        _arguments -s -S -C $help_opts \
+            ':old-theme-file:_files'
+        ;;
+    (pipe)
+        _arguments -s -S -C $help_opts \
+            '(-n --name)'{-n,--name}'=[The name of the pipe]:NAME: ' \
+            '(-a --args)'{-a,--args}'=[The args of the pipe]:ARGS: ' \
+            '(-p --plugin)'{-p,--plugin}'=[The plugin url to direct this pipe to]:PLUGIN: ' \
+            '(-c --plugin-configuration)'{-c,--plugin-configuration}'=[The plugin configuration]:PLUGIN_CONFIGURATION: ' \
+            '::payload:'
+        ;;
+    (help)
+        _arguments -s -S -C \
+            '*::subcommand:'
+        ;;
+    esac
+    ;;
+esac
+
+# ── Convenience Functions ─────────────────────────────────────────────────────
+# These shell functions provide quick shortcuts for common zellij operations.
+# They are loaded when the completion file is sourced.
+
+function zr () { zellij run --name "$*" -- zsh -ic "$*";}
+function zrf () { zellij run --name "$*" --floating -- zsh -ic "$*";}
+function zri () { zellij run --name "$*" --in-place -- zsh -ic "$*";}
+function ze () { zellij edit "$*";}
+function zef () { zellij edit --floating "$*";}
+function zei () { zellij edit --in-place "$*";}
+function zpipe () {
+  if [ -z "$1" ]; then
+    zellij pipe;
+  else
+    zellij pipe -p $1;
+  fi
+}
