@@ -1,6 +1,8 @@
 # zellij-zsh-completion
 
-ZSH tab-completion for [zellij](https://zellij.dev) terminal workspace.
+ZSH tab-completion for [zellij](https://zellij.dev) terminal workspace. Inspired by [conda-zsh-completion](https://github.com/conda-incubator/conda-zsh-completion).
+
+**Note**: Mainly works for [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh/) as a custom plugin.
 
 Features:
 
