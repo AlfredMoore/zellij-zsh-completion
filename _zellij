@@ -74,10 +74,7 @@ __zellij_commands(){
         'la:List existing plugin aliases'
         'help:Print this message or the help of the given subcommand(s)'
     )
-    _describe -t session_cmds 'session commands' session_cmds
-    _describe -t pane_cmds 'pane commands' pane_cmds
-    _describe -t config_cmds 'config commands' config_cmds
-    _describe -t misc_cmds 'misc commands' misc_cmds
+    _describe 'zellij commands' session_cmds -- pane_cmds -- config_cmds -- misc_cmds
 }
 
 __zellij_action_commands(){
@@ -148,12 +145,7 @@ __zellij_action_commands(){
         'query-tab-names:Query all tab names'
         'help:Print this message or the help of the given subcommand(s)'
     )
-    _describe -t pane_cmds 'pane commands' pane_cmds
-    _describe -t tab_cmds 'tab commands' tab_cmds
-    _describe -t scroll_cmds 'scroll commands' scroll_cmds
-    _describe -t layout_cmds 'layout commands' layout_cmds
-    _describe -t plugin_cmds 'plugin commands' plugin_cmds
-    _describe -t misc_cmds 'misc commands' misc_cmds
+    _describe 'zellij action commands' pane_cmds -- tab_cmds -- scroll_cmds -- layout_cmds -- plugin_cmds -- misc_cmds
 }
 
 __zellij_attach_commands(){

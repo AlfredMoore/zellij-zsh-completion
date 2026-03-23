@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(zsh -n _zellij)"
+      "Bash(zsh -n _zellij)",
+      "Bash(git -C /workspace/zellij-zsh-completion log --oneline -3)",
+      "Bash(zsh -n /workspace/zellij-zsh-completion/_zellij)"
     ]
   }
 }
