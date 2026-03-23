@@ -11,6 +11,18 @@ Features:
 
 ## Installation
 
+### Oh-My-Zsh
+
+```zsh
+git clone https://github.com/AlfredMoore/zellij-zsh-completion ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zellij-zsh-completion
+```
+
+Add it to your plugins in `~/.zshrc`:
+
+```zsh
+plugins=(... zellij-zsh-completion)
+```
+
 ### Manual
 
 Clone this repository:
@@ -26,17 +38,6 @@ fpath+=~/.zellij-zsh-completion
 autoload -Uz compinit && compinit
 ```
 
-### Oh-My-Zsh
-
-```zsh
-git clone https://github.com/AlfredMoore/zellij-zsh-completion ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zellij-zsh-completion
-```
-
-Add it to your plugins in `~/.zshrc`:
-
-```zsh
-plugins=(... zellij-zsh-completion)
-```
 
 ### Zim
 
